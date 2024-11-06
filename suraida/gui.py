@@ -30,7 +30,9 @@ from suraida.widgets import (
 numeric = Union[int, float, complex, np.number]
 
 
-def default_template(sliders: List[v.VuetifyWidget], plot: ipywidgets.Output) -> v.Html:
+def default_template(
+    sliders: List[v.VuetifyWidget], plot: ipywidgets.Output
+) -> v.Container:
     """
     This is the default template governing the arrangement of the widgets. This layout
     places the plot output on the left, and stacks sliders in a second column to the
@@ -49,9 +51,8 @@ def default_template(sliders: List[v.VuetifyWidget], plot: ipywidgets.Output) ->
         in the desired fashion.
 
     """
-    return v.Html(
-        tag="div",
-        class_="d-flex flex-row align-start",
+    return v.Container(
+        class_="d-flex flex-row justify-start",
         children=[plot, flex_column(sliders)],
     )
 
@@ -129,6 +130,7 @@ class InteractivePlot:
             display(self.fig)
 
         for idx, par_def in enumerate(self.param_defs):
+
             def handler(*args):
                 self.plot_output.clear_output(wait=True)
                 self.fig.axes[0].clear()
@@ -245,7 +247,7 @@ class Manipulate(InteractivePlot):
             var_name, var_values = var_def
         else:
             var_name, var_min, var_max, var_step = var_def
-            num = int((var_max - var_min)/var_step)
+            num = int((var_max - var_min) / var_step)
             var_values = np.linspace(var_min, var_max, num)
 
         def plot_func(fig, ax, *args):
