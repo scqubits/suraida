@@ -11,7 +11,6 @@
 
 from typing import List
 
-import numpy as np
 import ipyvuetify as v
 import traitlets
 
@@ -151,19 +150,19 @@ class IntEntry(BaseEntry, traitlets.HasTraits):
 
 class DiscreteSetSlider(v.Container, traitlets.HasTraits):
     def __init__(
-            self,
-            label,
-            param_vals,
-            initial_index=0,
-            slider_kwargs=None,
-            container_kwargs=None,
+        self,
+        label,
+        param_vals,
+        initial_index=0,
+        slider_kwargs=None,
+        container_kwargs=None,
     ):
         slider_kwargs = slider_kwargs or {}
         container_kwargs = container_kwargs or {}
         container_kwargs = {
-                               "class_": "d-flex flex-column",
-                               "style_": "max-width: 240px;",
-                           } | container_kwargs
+            "class_": "d-flex flex-column",
+            "style_": "max-width: 240px;",
+        } | container_kwargs
 
         # Store the parameter values and set the initial index
         self.label = label
@@ -171,9 +170,7 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
         self.val_count = len(param_vals)
 
         # Set up v_model as a traitlet to represent the value, allowing any numeric type
-        self.add_traits(
-            v_model=traitlets.Any(param_vals[initial_index]).tag(sync=True)
-        )
+        self.add_traits(v_model=traitlets.Any(param_vals[initial_index]).tag(sync=True))
         self.v_model = param_vals[initial_index]
 
         # Create the slider with initial index and display label
@@ -187,7 +184,9 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
         )
 
         # Initialize the display label
-        self.label_display = v.Html(tag="span", children=[f"{self.label}: {self.current_value()}"])
+        self.label_display = v.Html(
+            tag="span", children=[f"{self.label}: {self.current_value()}"]
+        )
 
         # Set up the container
         super().__init__(children=[self.label_display, self.slider], **container_kwargs)
@@ -213,9 +212,7 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
             if self.slider.v_model != new_index:
                 self.slider.v_model = new_index
             # Update label display with the current parameter value
-            self.label_display.children = [
-                f"{self.label}: {self.current_value()}"
-            ]
+            self.label_display.children = [f"{self.label}: {self.current_value()}"]
 
     def current_value(self):
         """Return the actual value stored in v_model."""
