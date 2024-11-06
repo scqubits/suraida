@@ -184,10 +184,8 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
             thumb_label=True,
             **slider_kwargs,
         )
-        # Initialize the display label with a default value
-        self.label_display = v.Html(
-            tag="span", children=[f"{label}: {self.current_value()}"]
-        )
+        # Initialize the display label
+        self.label_display = v.Html(tag=label, children=[label])
         # Set up the container
         super().__init__(children=[self.label_display, self.slider], **container_kwargs)
 
