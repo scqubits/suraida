@@ -151,29 +151,30 @@ class IntEntry(BaseEntry, traitlets.HasTraits):
 
 class DiscreteSetSlider(v.Container, traitlets.HasTraits):
     def __init__(
-        self,
-        label,
-        param_vals,
-        initial_index=0,
-        slider_kwargs=None,
-        container_kwargs=None,
+            self,
+            label,
+            param_vals,
+            initial_index=0,
+            slider_kwargs=None,
+            container_kwargs=None,
     ):
         slider_kwargs = slider_kwargs or {}
         container_kwargs = container_kwargs or {}
         container_kwargs = {
-            "class_": "d-flex flex-column",
-            "style_": "max-width: 240px;",
-        } | container_kwargs
+                               "class_": "d-flex flex-column",
+                               "style_": "max-width: 240px;",
+                           } | container_kwargs
 
         # Store the parameter values and set the initial index
+        self.label = label
         self.param_vals = param_vals
         self.val_count = len(param_vals)
 
-        # Set up v_model as a traitlet to represent the index, allowing any numeric type
+        # Set up v_model as a traitlet to represent the value, allowing any numeric type
         self.add_traits(
-            v_model=traitlets.Union([traitlets.Int(), traitlets.Float()]).tag(sync=True)
+            v_model=traitlets.Any(param_vals[initial_index]).tag(sync=True)
         )
-        self.v_model = initial_index
+        self.v_model = param_vals[initial_index]
 
         # Create the slider with initial index and display label
         self.slider = v.Slider(
@@ -181,11 +182,13 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
             max=self.val_count - 1,
             step=1,
             v_model=initial_index,
-            thumb_label=True,
+            thumb_label=False,
             **slider_kwargs,
         )
+
         # Initialize the display label
-        self.label_display = v.Html(tag=label, children=[label])
+        self.label_display = v.Html(tag="span", children=[f"{self.label}: {self.current_value()}"])
+
         # Set up the container
         super().__init__(children=[self.label_display, self.slider], **container_kwargs)
 
@@ -194,37 +197,29 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
         self.observe(self._on_v_model_change, names="v_model")
 
     def _on_slider_change(self, change):
-        """Update v_model when the slider changes."""
-        if change["new"] != self.v_model:
-            self.v_model = self.convert_to_type(change["new"])
+        """Update v_model to the corresponding value in param_vals when the slider changes."""
+        new_index = change["new"]
+        if 0 <= new_index < self.val_count:
+            new_value = self.param_vals[new_index]
+            if new_value != self.v_model:
+                self.v_model = new_value
 
     def _on_v_model_change(self, change):
         """Update the slider and label display when v_model changes."""
-        new_index = change["new"]
-        # Sync the slider's v_model
-        if self.slider.v_model != new_index:
-            self.slider.v_model = new_index
-        # Update label display with the current parameter value
-        self.label_display.children = [
-            f"{self.label_display.tag}: {self.current_value()}"
-        ]
+        new_value = change["new"]
+        if new_value in self.param_vals:
+            new_index = self.param_vals.index(new_value)
+            # Sync the slider's v_model
+            if self.slider.v_model != new_index:
+                self.slider.v_model = new_index
+            # Update label display with the current parameter value
+            self.label_display.children = [
+                f"{self.label}: {self.current_value()}"
+            ]
 
     def current_value(self):
-        """Return the actual value corresponding to the current index, with safety
-        check."""
-        # Ensure the index is within bounds
-        if 0 <= self.v_model < self.val_count:
-            return self.param_vals[int(self.v_model)]
-        return self.param_vals[
-            0
-        ]  # Fallback to the first value if index is out of range
-
-    def convert_to_type(self, value):
-        """Converts the slider value to a compatible numeric type based on param_vals."""
-        if isinstance(value, (int, float, np.integer, np.floating)):
-            return value
-        else:
-            raise ValueError("The slider value must be a numeric type.")
+        """Return the actual value stored in v_model."""
+        return self.v_model
 
 
 def flex_column(widgets: List[v.VuetifyWidget], class_="", **kwargs) -> v.Container:
