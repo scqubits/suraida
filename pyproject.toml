@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "suraida"
+description = "Creates a simple GUI for interactive plotting with sliders"
+version = "1.0.0"  # THIS IS THE PLACE WHERE THE VERSION GETS SET
+readme = "README.md"
+license = {text = "BSD"}
+authors = [{name = "Jens Koch", email = "jens-koch@northwestern.edu"}]
+keywords = ["interactive", "plotting"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: Microsoft :: Windows"
+]
+dependencies = [
+    "ipyvuetify",
+    "ipywidgets",
+    "traitlets",
+    "matplotlib",
+    "numpy"
+]
+requires-python = ">=3.11"
+
+# Use setuptools_scm to generate version from Git tags
+[tool.setuptools_scm]
+write_to = "suraida/version.py"
+version_scheme = "post-release"
+local_scheme = "no-local-version"
+
+# Optional: Use setuptools to control additional metadata not covered by PEP 621
+[tool.setuptools]
+platforms = ["Linux", "Mac OSX", "Unix", "Windows"]

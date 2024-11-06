@@ -1,0 +1,20 @@
+.DS_Store
+.idea/*
+
+# Packages
+*.egg
+*.egg-info
+
+*.pdf
+
+/build/
+/dist/
+/scratch/
+
+/.idea/*
+/.vscode/
+/.pytest_cache/
+/.coverage
+/.ipynb_checkpoints/
+/suraida/version.py
+Untitled*
