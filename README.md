@@ -6,6 +6,10 @@ Jump into a jupyter notebook, import `suraida` and use
 its `Manipulate` class like this:
 ```python
 import suraida as sr
+
+def func(z, amplitude, omega, offset):
+    return amplitude * np.sin(omega * z) + offset
+
 sr.Manipulate(func,                          # the numerical function we wish to plot and manipulate parameters via sliders
               var_def=["z", 0, 7, 0.1],      # definition of the variable against which to plot `func`, specifying min, max and step
               param_defs=[
