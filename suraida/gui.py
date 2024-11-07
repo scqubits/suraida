@@ -122,28 +122,25 @@ class InteractivePlot:
             layout=ipywidgets.Layout(overflow="hidden")
         )
         self.fig, self.ax = plt.subplots()
-        _ = self.plot(
-            self.fig, self.fig.axes[0], *[slider.v_model for slider in self.sliders]
-        )
+        _ = self.plot(self.fig, self.fig.axes[0], **self.get_param_dict())
         plt.close("all")
         with self.plot_output:
             display(self.fig)
 
+        def handler(*args):
+            self.plot_output.clear_output(wait=True)
+            self.fig.axes[0].clear()
+            self.update_plot(
+                self.fig,
+                self.fig.axes[0],
+                **self.get_param_dict(),
+            )
+            plt.close("all")
+            with self.plot_output:
+                display(self.fig)
+            self.ax = self.fig.axes[0]
+
         for idx, par_def in enumerate(self.param_defs):
-
-            def handler(*args):
-                self.plot_output.clear_output(wait=True)
-                self.fig.axes[0].clear()
-                self.update_plot(
-                    self.fig,
-                    self.fig.axes[0],
-                    *(self.sliders[n].v_model for n, _ in enumerate(self.param_defs)),
-                )
-                plt.close("all")
-                with self.plot_output:
-                    display(self.fig)
-                self.ax = self.fig.axes[0]
-
             self.sliders[idx].observe(handler, names="v_model")
 
         display(self.gui_container(self.sliders, self.plot_output))
@@ -190,6 +187,19 @@ class InteractivePlot:
             v_max=var_max,
             step=step,
         )
+
+    def get_param_dict(self) -> dict:
+        """
+        Return all parameter names and corresponding values as dict.
+
+        Returns
+        -------
+            A dict of the form `{<param_name>: <param_val>, ...}`
+        """
+        return {
+            par_def[0]: self.sliders[idx].v_model
+            for idx, par_def in enumerate(self.param_defs)
+        }
 
 
 class Manipulate(InteractivePlot):
@@ -250,8 +260,8 @@ class Manipulate(InteractivePlot):
             num = int((var_max - var_min) / var_step)
             var_values = np.linspace(var_min, var_max, num)
 
-        def plot_func(fig, ax, *args):
-            func_values = np.asarray([func(z, *args) for z in var_values])
+        def plot_func(fig, ax, **kwargs):
+            func_values = np.asarray([func(z, **kwargs) for z in var_values])
             ax.plot(var_values, func_values)
 
         super().__init__(plot_func=plot_func, param_defs=param_defs, template=template)
