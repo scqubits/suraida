@@ -146,7 +146,12 @@ class InteractivePlot:
             display(self.fig)
 
         # Add the "Copy parameters to..." and "Save plot to..." UI elements
-        self.param_name_field = v.TextField(label="Variable name", v_model="param_dict")
+        self.param_name_field = v.TextField(
+            label="Variable name",
+            v_model="param_dict",
+            small=True,
+            style_="max-width:150px",
+        )
         self.copy_button = v.Btn(
             children=["Copy params to..."],
             outlined=True,
@@ -155,7 +160,12 @@ class InteractivePlot:
         )
         self.copy_button.on_event("click", self.copy_parameters_to)
 
-        self.filename_field = v.TextField(label="Filename for plot", v_model="plot.png")
+        self.filename_field = v.TextField(
+            label="Filename for plot",
+            v_model="plot.pdf",
+            small=True,
+            style_="max-width:150px",
+        )
         self.save_button = v.Btn(
             children=["Save figure to..."],
             outlined=True,
