@@ -223,3 +223,8 @@ def flex_column(widgets: List[v.VuetifyWidget], class_="", **kwargs) -> v.Contai
     return v.Container(
         class_="d-flex flex-column " + class_, children=widgets, **kwargs
     )
+
+def flex_row(widgets: List[v.VuetifyWidget], class_="", **kwargs) -> v.Container:
+    return v.Container(
+        class_="d-flex flex-row " + class_, children=widgets, **kwargs
+    )
