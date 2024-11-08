@@ -18,9 +18,11 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from IPython.display import display
+from IPython import get_ipython
 
 from suraida.widgets import (
     flex_column,
+    flex_row,
     FloatEntry,
     BaseEntry,
     DiscreteSetSlider,
@@ -31,7 +33,7 @@ numeric = Union[int, float, complex, np.number]
 
 
 def default_template(
-    sliders: List[v.VuetifyWidget], plot: ipywidgets.Output
+    sliders: List[v.VuetifyWidget], plot: ipywidgets.Output, controls: v.Container
 ) -> v.Container:
     """
     This is the default template governing the arrangement of the widgets. This layout
@@ -44,16 +46,23 @@ def default_template(
         The list of sliders.
     plot:
         The plot output widget.
+    controls:
+        Container with save buttons.
 
     Returns
     -------
-        An ipyvuetify.Html object which arranges the plot output and slider widgets
+        An ipyvuetify.Container object which arranges the plot output and slider widgets
         in the desired fashion.
 
     """
     return v.Container(
-        class_="d-flex flex-row justify-start",
-        children=[plot, flex_column(sliders)],
+        class_="d-flex flex-column",
+        children=[
+            v.Container(
+                class_="d-flex flex-row",
+                children=[plot, flex_column(sliders + [controls])],
+            ),
+        ],
     )
 
 
@@ -96,54 +105,160 @@ class InteractivePlot:
 
     def __init__(
         self,
-        plot_func: Callable[[Figure, Axes, ...], Optional[Tuple[Figure, Axes]]],
+        plot_func: Callable[
+            [plt.Figure, plt.Axes, ...], Optional[Tuple[plt.Figure, plt.Axes]]
+        ],
         param_defs: List[
             Union[
-                Tuple[str, List[numeric]],
-                Tuple[str, numeric, numeric, numeric],
-                Tuple[str, numeric, numeric, numeric, numeric],
+                Tuple[str, List[Union[int, float, complex]]],
+                Tuple[str, Union[int, float], Union[int, float], Union[int, float]],
+                Tuple[
+                    str,
+                    Union[int, float],
+                    Union[int, float],
+                    Union[int, float],
+                    Union[int, float],
+                ],
             ]
         ],
         update_plot_func: Optional[
-            Callable[[Figure, Axes, ...], Optional[Tuple[Figure, Axes]]]
+            Callable[[plt.Figure, plt.Axes, ...], Optional[Tuple[plt.Figure, plt.Axes]]]
         ] = None,
         template: Optional[
             Callable[[List[v.VuetifyWidget], ipywidgets.Output], v.Container]
-        ] = default_template,
+        ] = None,
     ):
         self.param_defs = param_defs
         self.update_plot = update_plot_func or plot_func
         self.plot = plot_func
-        self.gui_container = template
+        self.gui_container = template or default_template
 
         self.sliders = [self.make_slider(par_def) for par_def in param_defs]
-
         self.plot_output = ipywidgets.Output(
             layout=ipywidgets.Layout(overflow="hidden")
         )
-        self.fig, self.ax = plt.subplots()
+
+        # Set up figure and initial plot display
+        self.fig, self.ax = plt.subplots(figsize=(8, 5))
         _ = self.plot(self.fig, self.fig.axes[0], **self.get_param_dict())
         plt.close("all")
         with self.plot_output:
             display(self.fig)
 
-        def handler(*args):
-            self.plot_output.clear_output(wait=True)
-            self.fig.axes[0].clear()
-            self.update_plot(
-                self.fig,
-                self.fig.axes[0],
-                **self.get_param_dict(),
-            )
-            plt.close("all")
-            with self.plot_output:
-                display(self.fig)
-            self.ax = self.fig.axes[0]
+        # Add the "Copy parameters to..." and "Save plot to..." UI elements
+        self.param_name_field = v.TextField(label="Variable name", v_model="param_dict")
+        self.copy_button = v.Btn(
+            children=["Copy params to..."],
+            outlined=True,
+            small=True,
+            style_="margin-right: 20px;",
+        )
+        self.copy_button.on_event("click", self.copy_parameters_to)
 
-        for idx, par_def in enumerate(self.param_defs):
+        self.filename_field = v.TextField(label="Filename for plot", v_model="plot.png")
+        self.save_button = v.Btn(
+            children=["Save figure to..."],
+            outlined=True,
+            small=True,
+            style_="margin-right: 20px;",
+        )
+        self.save_button.on_event("click", self.save_plot_to)
+
+        # Display the interface
+        self.control_panel = flex_column(
+            [
+                flex_row([self.copy_button, self.param_name_field]),
+                flex_row([self.save_button, self.filename_field]),
+            ]
+        )
+
+        # Observe slider changes and update plot dynamically
+        def handler(*args):
+            self.update_plot_display()
+
+        for idx, _ in enumerate(self.param_defs):
             self.sliders[idx].observe(handler, names="v_model")
 
-        display(self.gui_container(self.sliders, self.plot_output))
+        # Display the UI with sliders, plot, and additional buttons/text fields
+        display(self.gui_container(self.sliders, self.plot_output, self.control_panel))
+
+    def copy_parameters_to(self, *args):
+        """Copy the parameter dictionary to the specified variable name in the notebook's namespace."""
+        param_name = self.param_name_field.v_model or "param_dict"
+        param_dict = self.get_param_dict()
+        ipython = get_ipython()
+
+        if ipython:
+            # Inject the dictionary into the notebook's interactive namespace
+            ipython.user_ns[param_name] = param_dict
+        else:
+            print("Warning: Could not access IPython interactive namespace.")
+
+    def save_plot_to(self, *args):
+        """Save the current plot to the specified filename."""
+        filename = self.filename_field.v_model or "plot.pdf"
+        self.fig.savefig(filename)
+
+    def update_plot_display(self):
+        """Update the plot display in the Output widget."""
+        self.plot_output.clear_output(wait=True)
+        self.fig.axes[0].clear()
+        self.update_plot(self.fig, self.fig.axes[0], **self.get_param_dict())
+        plt.close("all")
+        with self.plot_output:
+            display(self.fig)
+        self.ax = self.fig.axes[0]
+
+    # def __init__(
+    #     self,
+    #     plot_func: Callable[[Figure, Axes, ...], Optional[Tuple[Figure, Axes]]],
+    #     param_defs: List[
+    #         Union[
+    #             Tuple[str, List[numeric]],
+    #             Tuple[str, numeric, numeric, numeric],
+    #             Tuple[str, numeric, numeric, numeric, numeric],
+    #         ]
+    #     ],
+    #     update_plot_func: Optional[
+    #         Callable[[Figure, Axes, ...], Optional[Tuple[Figure, Axes]]]
+    #     ] = None,
+    #     template: Optional[
+    #         Callable[[List[v.VuetifyWidget], ipywidgets.Output], v.Container]
+    #     ] = default_template,
+    # ):
+    #     self.param_defs = param_defs
+    #     self.update_plot = update_plot_func or plot_func
+    #     self.plot = plot_func
+    #     self.gui_container = template
+    #
+    #     self.sliders = [self.make_slider(par_def) for par_def in param_defs]
+    #
+    #     self.plot_output = ipywidgets.Output(
+    #         layout=ipywidgets.Layout(overflow="hidden")
+    #     )
+    #     self.fig, self.ax = plt.subplots(figsize=(8, 5))
+    #     _ = self.plot(self.fig, self.fig.axes[0], **self.get_param_dict())
+    #     plt.close("all")
+    #     with self.plot_output:
+    #         display(self.fig)
+    #
+    #     def handler(*args):
+    #         self.plot_output.clear_output(wait=True)
+    #         self.fig.axes[0].clear()
+    #         self.update_plot(
+    #             self.fig,
+    #             self.fig.axes[0],
+    #             **self.get_param_dict(),
+    #         )
+    #         plt.close("all")
+    #         with self.plot_output:
+    #             display(self.fig)
+    #         self.ax = self.fig.axes[0]
+    #
+    #     for idx, par_def in enumerate(self.param_defs):
+    #         self.sliders[idx].observe(handler, names="v_model")
+    #
+    #     display(self.gui_container(self.sliders, self.plot_output))
 
     @staticmethod
     def make_slider(
