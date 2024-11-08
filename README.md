@@ -20,6 +20,6 @@ sr.Manipulate(func,                          # the numerical function we wish to
               ]
              )
 ```
-<img src="https://github.com/scqubits/suraida/blob/main/display.gif" width="400" />
+<img src="https://github.com/scqubits/suraida/blob/main/display.gif" width="800" />
 
 
