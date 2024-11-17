@@ -9,24 +9,31 @@
 ############################################################################
 
 
-from typing import List
+from typing import List, Optional, Union
 
 import ipyvuetify as v
+import numpy as np
 import traitlets
+
+
+numeric = Union[int, float, complex, np.number]
 
 
 class BaseEntry(v.Container):
     def __init__(
         self,
-        label,
-        v_model,
-        v_min,
-        v_max,
-        step,
+        label: str,
+        v_model: Optional[int | float | np.number],
+        v_min: int | float | np.number,
+        v_max: int | float | np.number,
+        step: int | float | np.number,
         text_kwargs=None,
         slider_kwargs=None,
         container_kwargs=None,
+        id=-1,
     ):
+        self.add_traits(v_model=traitlets.Float(v_model).tag(sync=True))
+        self.add_traits(id=traitlets.Int(id).tag(sync=True))
         text_kwargs = {"style_": "max-width: 50px;"} | (text_kwargs or {})
         slider_kwargs = slider_kwargs or {}
         container_kwargs = container_kwargs or {}
@@ -56,6 +63,8 @@ class BaseEntry(v.Container):
             children=[self.text_field, self.slider],
             **container_kwargs,
         )
+        self.v_model = v_model
+        self.id = id
 
         # Link changes to central v_model
         self.text_field.on_event("focusout", self._on_text_field_focusout)
@@ -94,17 +103,16 @@ class BaseEntry(v.Container):
 class FloatEntry(BaseEntry, traitlets.HasTraits):
     def __init__(
         self,
-        label,
+        label: str,
         v_model,
-        v_min,
-        v_max,
-        step,
+        v_min: int | float | np.number,
+        v_max: int | float | np.number,
+        step: int | float | np.number,
         text_kwargs=None,
         slider_kwargs=None,
         container_kwargs=None,
+        id=-1,
     ):
-        self.add_traits(v_model=traitlets.Float(v_model).tag(sync=True))
-        self.v_model = v_model
         super().__init__(
             label=label,
             v_model=v_model,
@@ -114,6 +122,7 @@ class FloatEntry(BaseEntry, traitlets.HasTraits):
             text_kwargs=text_kwargs,
             slider_kwargs=slider_kwargs,
             container_kwargs=container_kwargs,
+            id=id,
         )
 
     def convert_to_type(self, value):
@@ -123,16 +132,16 @@ class FloatEntry(BaseEntry, traitlets.HasTraits):
 class IntEntry(BaseEntry, traitlets.HasTraits):
     def __init__(
         self,
-        label,
-        v_model,
-        v_min,
-        v_max,
-        step,
+        label: str,
+        v_model: Optional[int],
+        v_min: int,
+        v_max: int,
+        step: int,
         text_kwargs=None,
         slider_kwargs=None,
         container_kwargs=None,
+        id=-1,
     ):
-        self.add_traits(v_model=traitlets.Int(v_model).tag(sync=True))
         super().__init__(
             label=label,
             v_model=v_model,
@@ -142,6 +151,7 @@ class IntEntry(BaseEntry, traitlets.HasTraits):
             text_kwargs=text_kwargs,
             slider_kwargs=slider_kwargs,
             container_kwargs=container_kwargs,
+            id=id,
         )
 
     def convert_to_type(self, value):
@@ -151,11 +161,12 @@ class IntEntry(BaseEntry, traitlets.HasTraits):
 class DiscreteSetSlider(v.Container, traitlets.HasTraits):
     def __init__(
         self,
-        label,
-        param_vals,
+        label: str,
+        param_vals: List[numeric] | np.ndarray,
         initial_index=0,
         slider_kwargs=None,
         container_kwargs=None,
+        id=-1,
     ):
         slider_kwargs = slider_kwargs or {}
         container_kwargs = container_kwargs or {}
@@ -166,7 +177,9 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
 
         # Store the parameter values and set the initial index
         self.label = label
-        self.param_vals = param_vals
+        self.param_vals = (
+            np.array(param_vals) if isinstance(param_vals, list) else param_vals
+        )
         self.val_count = len(param_vals)
 
         # Set up v_model as a traitlet to represent the value, allowing any numeric type
@@ -189,7 +202,9 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
         )
 
         # Set up the container
-        super().__init__(children=[self.label_display, self.slider], **container_kwargs)
+        super().__init__(
+            id=str(id), children=[self.label_display, self.slider], **container_kwargs
+        )
 
         # Observe changes in the slider and the trait
         self.slider.observe(self._on_slider_change, names="v_model")
@@ -207,7 +222,7 @@ class DiscreteSetSlider(v.Container, traitlets.HasTraits):
         """Update the slider and label display when v_model changes."""
         new_value = change["new"]
         if new_value in self.param_vals:
-            new_index = self.param_vals.index(new_value)
+            new_index = np.where(self.param_vals == new_value)[0]
             # Sync the slider's v_model
             if self.slider.v_model != new_index:
                 self.slider.v_model = new_index
@@ -224,7 +239,6 @@ def flex_column(widgets: List[v.VuetifyWidget], class_="", **kwargs) -> v.Contai
         class_="d-flex flex-column " + class_, children=widgets, **kwargs
     )
 
+
 def flex_row(widgets: List[v.VuetifyWidget], class_="", **kwargs) -> v.Container:
-    return v.Container(
-        class_="d-flex flex-row " + class_, children=widgets, **kwargs
-    )
+    return v.Container(class_="d-flex flex-row " + class_, children=widgets, **kwargs)
