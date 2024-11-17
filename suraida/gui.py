@@ -205,7 +205,7 @@ class InteractivePlot:
             small=True,
             style_="margin-right: 20px;",
         )
-        self.copy_button.on_event("click", self.copy_fig_to)
+        self.copy_figure_button.on_event("click", self.copy_fig_to)
 
         self.filename_field = v.TextField(
             label="Filename for plot",
