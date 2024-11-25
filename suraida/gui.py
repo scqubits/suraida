@@ -93,32 +93,32 @@ class InteractivePlot:
 
     Parameters
     ----------
-        plot_func:
-            user-provided function expected to have the signature `plot_func(
-            the signature `plot_func(ax, x1, x2, ...)`.
-            Here, `x1`, `x2`, ... are parameters (those turned into sliders).
-            The plot should be implemented by accessing the matplotlib Axes expected
-            as the first argument,  for example via `ax.plot(...)`.
-            The return value of plot_func is not used.
-        param_defs:
-            Specifies the name of the parameter and its allowed values
-            according to three alternative formats.
-            (i)   (<parameter_name>, <list-like object of allowed values>)
-            (ii)  (<parameter_name>, min, max, step)
-            (iii) (<parameter_name>, min, max, step, ini)
-        update_plot_func:
-            This is an optional parameter, providing an alternative plotting function
-            for updates after the first initial plot. (If omitted, `plot_func` will
-            be used for updates.)
-        template:
-            This optional parameter allows user-defined layouts of the user-interface,
-            specifically how plot output and sliders are arranged and formatted. The
-            default formatting (implemented when this argument is omitted) is governed
-            by
-            ``def default_template(sliders, plot):
-                 return v.Html(tag="div",
-                               class_="d-flex flex-row align-start",
-                               children=[plot, flex_column(sliders)])``
+    plot_func:
+        user-provided function expected to have the signature `plot_func(
+        the signature `plot_func(ax, x1, x2, ...)`.
+        Here, `x1`, `x2`, ... are parameters (those turned into sliders).
+        The plot should be implemented by accessing the matplotlib Axes expected
+        as the first argument,  for example via `ax.plot(...)`.
+        The return value of plot_func is not used.
+    param_defs:
+        Specifies the name of the parameter and its allowed values
+        according to three alternative formats.
+        (i)   (<parameter_name>, <list-like object of allowed values>)
+        (ii)  (<parameter_name>, min, max, step)
+        (iii) (<parameter_name>, min, max, step, ini)
+    update_plot_func:
+        This is an optional parameter, providing an alternative plotting function
+        for updates after the first initial plot. (If omitted, `plot_func` will
+        be used for updates.)
+    template:
+        This optional parameter allows user-defined layouts of the user-interface,
+        specifically how plot output and sliders are arranged and formatted. The
+        default formatting (implemented when this argument is omitted) is governed
+        by
+        ``def default_template(sliders, plot):
+             return v.Html(tag="div",
+                           class_="d-flex flex-row align-start",
+                           children=[plot, flex_column(sliders)])``
 
     """
 
@@ -344,7 +344,7 @@ class InteractivePlot:
         -------
             Slider of the appropriate form. For format (i), this is a DiscreteSetSlider.
             For formats (ii) and (iii) it is a FloatEntry. For (ii) the initial slider
-            position is chosen the midpoint between min and max.
+            position is chosen as the midpoint between min and max.
 
         """
         if len(par_def) == 2:
