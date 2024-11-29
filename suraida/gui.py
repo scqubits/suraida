@@ -10,6 +10,7 @@
 
 
 import inspect
+import warnings
 
 from typing import Any, Callable, List, Optional, Tuple, Union
 
@@ -32,7 +33,7 @@ from suraida.widgets import (
 )
 
 
-paramdef_type = Union[
+ParameterDefinition = Union[
     Tuple[str, Union[List[numeric], np.ndarray]],
     Tuple[str, Union[int, float], Union[int, float], Union[int, float]],
     Tuple[
@@ -43,7 +44,7 @@ paramdef_type = Union[
         Union[int, float],
     ],
 ]
-vardef_type = Union[
+VariableDefinition = Union[
     Tuple[str, Union[List[numeric], np.ndarray]],
     Tuple[str, Union[int, float], Union[int, float], Union[int, float]],
 ]
@@ -125,7 +126,7 @@ class InteractivePlot:
     def __init__(
         self,
         plot_func: Union[Callable[[Axes, numeric, ...], Any], np.ndarray, list],
-        param_defs: List[paramdef_type],
+        param_defs: List[ParameterDefinition],
         update_plot_func: Optional[
             Union[Callable[[Axes, numeric, ...], Any], np.ndarray, list]
         ] = None,
@@ -229,10 +230,20 @@ class InteractivePlot:
         )
         self.plot_options_button.on_event("click", self.show_overlay)
 
+        # Add "Auto Ranges" Checkbox
+        self.auto_ranges_checkbox = v.Checkbox(
+            v_model=True,  # Default to "on"
+            small=True,
+            color="primary",
+            children=[v.Icon(children=["mdi-check"])],
+            style_="margin-right: 20px; margin-left: 40px; margin-top: 0px;",
+            label="Auto Ranges"
+        )
+        self.auto_ranges_checkbox.observe(lambda *args: self.update_plot_display(), names="v_model")
         # Display the interface
         self.control_panel = flex_column(
             [
-                flex_row([self.plot_options_button]),
+                flex_row([self.plot_options_button, self.auto_ranges_checkbox]),
                 flex_row([self.copy_button, self.param_name_field]),
                 flex_row([self.copy_figure_button, self.fig_field]),
                 flex_row([self.save_button, self.filename_field]),
@@ -279,7 +290,7 @@ class InteractivePlot:
             # Inject the dictionary into the notebook's interactive namespace
             ipython.user_ns[param_name] = param_dict
         else:
-            print("Warning: Could not access IPython interactive namespace.")
+            warnings.warn("Warning: Could not access IPython interactive namespace.")
 
     def copy_fig_to(self, *args):
         """Copy the parameter dictionary to the specified variable name in the notebook's namespace."""
@@ -290,7 +301,7 @@ class InteractivePlot:
             # Inject the dictionary into the notebook's interactive namespace
             ipython.user_ns[fig_name] = self.fig
         else:
-            print("Warning: Could not access IPython interactive namespace.")
+            warnings.warn("Warning: Could not access IPython interactive namespace.")
 
     def save_plot_to(self, *args):
         """Save the current plot to the specified filename."""
@@ -301,13 +312,16 @@ class InteractivePlot:
         """Update the plot display in the Output widget."""
         self.plot_output.clear_output(wait=True)
 
+        auto_ranges = self.auto_ranges_checkbox.v_model
+
         # Capture existing axis limits
         axis_limits = []
-        for ax in self.fig.axes:
-            axis_limits.append({
-                "xlim": ax.get_xlim(),
-                "ylim": ax.get_ylim()
-            })
+        if not auto_ranges:
+            for ax in self.fig.axes:
+                axis_limits.append({
+                    "xlim": ax.get_xlim(),
+                    "ylim": ax.get_ylim()
+                })
 
         # Clear the axes contents without resetting their state
         for ax in self.fig.axes:
@@ -317,9 +331,10 @@ class InteractivePlot:
         self.update_plot(self.fig, **self.get_param_dict())
 
         # Restore axis limits after the plot update
-        for ax, limits in zip(self.fig.axes, axis_limits):
-            ax.set_xlim(*limits["xlim"])
-            ax.set_ylim(*limits["ylim"])
+        if not auto_ranges:
+            for ax, limits in zip(self.fig.axes, axis_limits):
+                ax.set_xlim(*limits["xlim"])
+                ax.set_ylim(*limits["ylim"])
 
         # Redraw the plot
         plt.close("all")
@@ -327,7 +342,7 @@ class InteractivePlot:
             display(self.fig)
 
     @staticmethod
-    def make_slider(par_def: paramdef_type, id: Optional[int]=-1) -> Union[BaseEntry, DiscreteSetSlider]:
+    def make_slider(par_def: ParameterDefinition, id: Optional[int]=-1) -> Union[BaseEntry, DiscreteSetSlider]:
         """
         Takes an arg_range in one of four formats and returns an ipyvuetify element
         appropriate for changing the given parameter.
@@ -387,8 +402,8 @@ class InteractivePlot:
         )
 
         # Create text fields for each Axes
-        self.axes_entries = []
-        for ax in self.fig.axes:
+        self.axes_entries = {}
+        for idx, ax in enumerate(self.fig.axes):
             entries = {
                 "xmin": v.TextField(
                     label="Xmin",
@@ -411,7 +426,7 @@ class InteractivePlot:
                     small=True,
                 ),
             }
-            self.axes_entries.append(entries)
+            self.axes_entries[idx] = entries
 
         # Create buttons
         apply_button = v.Btn(
@@ -446,7 +461,8 @@ class InteractivePlot:
                                     ]
                                 )
                             ]
-                            + [
+                            + [ flex_column([
+                                v.Html(tag='h3', children=[f"Plot #{idx + 1}"]),
                                 v.Row(
                                     children=[
                                         entries["xmin"],
@@ -454,8 +470,8 @@ class InteractivePlot:
                                         entries["ymin"],
                                         entries["ymax"],
                                     ]
-                                )
-                                for entries in self.axes_entries
+                                )])
+                                for idx, entries in self.axes_entries.items()
                             ]
                         ),
                         v.CardActions(children=[apply_button, close_button]),
@@ -467,6 +483,12 @@ class InteractivePlot:
 
     def show_overlay(self, *args):
         """Show the overlay dialog."""
+        for idx, ax in enumerate(self.fig.axes):
+            self.axes_entries[idx]["xmin"].v_model = str(ax.get_xlim()[0])
+            self.axes_entries[idx]["xmax"].v_model = str(ax.get_xlim()[1])
+            self.axes_entries[idx]["ymin"].v_model = str(ax.get_ylim()[0])
+            self.axes_entries[idx]["ymax"].v_model = str(ax.get_ylim()[1])
+
         self.dialog.v_model = True
 
     def hide_overlay(self, *args):
@@ -484,7 +506,7 @@ class InteractivePlot:
             self.fig.set_size_inches(new_width, current_height)
 
             # Update Axes limits with string-to-float conversion
-            for ax, entries in zip(self.fig.axes, self.axes_entries):
+            for ax, entries in zip(self.fig.axes, self.axes_entries.values()):
                 ax.set_xlim(
                     left=float(entries["xmin"].v_model),
                     right=float(entries["xmax"].v_model),
@@ -494,6 +516,7 @@ class InteractivePlot:
                     top=float(entries["ymax"].v_model),
                 )
 
+            self.auto_ranges_checkbox.v_model = False
             # Redraw the plot
             self.update_plot_display()
 
@@ -544,8 +567,8 @@ class Manipulate(InteractivePlot):
     def __init__(
         self,
         func: Union[Callable[[numeric, numeric, ...], numeric], np.ndarray, list],
-        var_def: vardef_type,
-        param_defs: paramdef_type,
+        var_def: VariableDefinition,
+        param_defs: ParameterDefinition,
         template: Optional[
             Callable[[List[v.VuetifyWidget], ipywidgets.Output], v.Container]
         ] = default_template,
@@ -616,8 +639,8 @@ class Manipulate(InteractivePlot):
                 )
                 ax.line[0].set_ydata(func_values)
 
-            new_plot_func.__signature__ = signature
-            return new_plot_func
+            new_update_func.__signature__ = signature
+            return new_update_func
 
         plot_funcs = np.full_like(self.funcs, None)
         for idx, func in np.ndenumerate(self.funcs):
