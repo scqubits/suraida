@@ -1,7 +1,6 @@
 `suraida` is a lightweight package facilitating
 interactive plotting similar to Mathematica's `Manipulate`.
-Given a function with multiple parameters, you want to
-visualize the function and "play" with the parameters?
+Do you want to visualize a function and "play" with its parameters?
 Jump into a jupyter notebook, import `suraida` and use
 its `Manipulate` class like this:
 ```python

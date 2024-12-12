@@ -1,0 +1,245 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+
+h1 {
+    font-size: 45px;
+    margin-top: 10px;
+    margin-bottom: 50px;
+    font-weight: 600;
+    font-family: Roboto,"Open Sans", ff-tisa-web-pro,Arial,sans-serif;
+}
+
+h2 {
+    margin-top: 70px !important;
+    margin-bottom: 28px;
+    font-size: 32px;
+    font-weight: 600 !important;
+    line-height: 32px;
+    color: #4d6db2;
+}
+
+h3 {
+    font-size: 24px;
+    line-height: 24px;
+    margin-top: 40px;
+    color: #4d77cf;
+}
+
+b, strong {
+  font-weight: 700;
+}
+
+.section-nav {
+    padding-left: 0;
+    border: none;
+}
+
+.rst-content .toctree-wrapper > p.caption, h2, h3, h4, h5, h6, legend {
+    margin-top: 50px;
+    font-weight: 400;
+    font-family: Roboto, "Open Sans", ff-tisa-web-pro, Arial, sans-serif;
+}
+
+.rst-content code, .rst-content tt, code, cite {
+    white-space: nowrap;
+    font-style: normal;
+    font-size: 100%;
+    font-weight: 650;
+    font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,Courier,monospace;
+    color: rgb(0, 90, 130);
+    line-height: 1.5;
+}
+
+div.nboutput.container div.output_area {
+  background: #f8f9fa;
+}
+
+.bd-sidebar {
+    padding-top: 1em;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background: #f8f8f8;
+}
+
+.bd-toc {
+    background: #fcfcfc;
+}
+
+body {
+    font-family: Roboto, "Open Sans",sans-serif;
+    font-size: 15px;
+    line-height: 24px;
+    font-weight: 400;
+    color: rgb(74,74,74);
+}
+
+.rst-content .linenodiv pre, .rst-content div[class^="highlight"] pre, .rst-content pre.literal-block {
+    font-style: normal;
+    font-size: 100%;
+    font-weight: 500;
+    font-family: SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,Courier,monospace;
+    line-height: 1.5;
+}
+
+.navbar .container-xl {
+	height: 70px;
+}
+
+.navbar-light {
+	background: rgb(247,248,249) !important;
+}
+
+.navbar-brand img {
+  max-width: 70%;
+  height: auto;
+  width: 60%;
+}
+
+nav.bd-links .active:hover > a, nav.bd-links .active > a {
+  background-color: #f3f3f3;
+}
+
+address, dl, ol, ul {
+	margin-bottom: 2rem;
+}
+
+ol.simple p, ul.simple p {
+  margin-bottom: 10px;
+}
+
+.sig {
+	font-family: var(--pst-font-family-monospace);
+	background: #f0f8ffd9;
+}
+
+.sig-name {
+	color: rgb(0,0,0);
+}
+
+p.rubric {
+	border-bottom: 1px solid #c9c9c9;
+	margin-top: 30px;
+}
+
+pre {
+	font-size: 95%;
+	line-height: 1.5em;
+    background-color: #fafdff;
+    padding-left: 20px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+div.nbinput.container div.prompt pre, div.nboutput.container div.prompt pre {
+	overflow: hidden;
+	visibility: hidden;
+}
+
+div.nbinput.container div.input_area {
+    border: none;
+}
+
+html[data-theme="light"] .highlight pre {
+    line-height: 125%;
+    border: none;
+}
+
+.bd-toc .onthispage {
+	color: #053d5a;
+	font-size: 17px;
+}
+
+.tocsection {
+    border: none;
+    padding: .3rem 1.5rem;
+}
+
+p {
+	margin-bottom: 1.6rem;
+	margin-top: 1.6rem;
+    margin-left: 15px;
+}
+
+div.nbinput.container div.input_area div[class*=highlight] > pre {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    margin: 0;
+}
+
+div.nbinput.container, div.nboutput.container {
+    margin-left: 15px;
+    padding-left: 15px;
+    border: none;
+}
+
+div.nblast.container {
+    padding-bottom: 5px;
+    padding-left: 15px;
+    border: none;
+}
+
+div.nbinput.container {
+    padding-left: 15px;
+}
+
+div.nbinput.container div.input_area {
+    border: none;
+}
+
+div.nbinput.container, div.nboutput.container {
+    border: none;
+}
+
+.toc-entry>.nav-link.active {
+    font-weight: 600;
+    color: #0d5e77;
+    background-color: aliceblue;
+}
+
+nav.bd-links .active:hover>a, nav.bd-links .active>a {
+    font-weight: 600;
+    color: #0d5e77;
+}
+
+nav.bd-links .active:hover > a, nav.bd-links .active > a {
+    background-color: aliceblue;
+}
+
+li.toctree-l1.current.active, li.toctree-l1.current.active.has-children {
+    background: aliceblue;
+    border-left: 6px solid var(--pst-color-primary);
+    margin-left: -6px;
+}
+
+.input_area.highlight-ipython3.notranslate {
+    border: none !important;
+    border-left: 2px solid #e0e0e0 !important;
+}
+
+.output_area.docutils.container {
+    border: none !important;
+    border-left: 2px solid #e0e0e0 !important;
+}
+
+div#navbar-collapsible {
+    font-size: larger;
+}
+
+li.toctree-l1.current.active.nav-item {
+    border: none;
+}
+
+.toctree-wrapper>ul {
+    padding-left: 40px;
+}
+
+img {
+    padding-left: 30px;
+    border: 0;
+    max-width: 100%;
+}
+
+nav.bd-links p.caption {
+    color: #001575;
+}
