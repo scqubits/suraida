@@ -27,7 +27,8 @@ dependencies = [
     "ipywidgets",
     "traitlets",
     "matplotlib",
-    "numpy"
+    "numpy",
+    "jupyter"
 ]
 requires-python = ">=3.10"
 
