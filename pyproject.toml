@@ -8,7 +8,10 @@ description = "Creates a simple GUI for interactive plotting with sliders"
 dynamic = ["version"]
 readme = "README.md"
 license = {text = "BSD"}
-authors = [{name = "Jens Koch", email = "jens-koch@northwestern.edu"}]
+authors = [
+    {name = "Jens Koch", email = "jens-koch@northwestern.edu"},
+    {name = "Yunwei Lu", email = "yunweilu2020@u.northwestern.edu"},
+    ]
 keywords = ["interactive", "plotting"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
