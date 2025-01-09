@@ -29,7 +29,7 @@ dependencies = [
     "matplotlib",
     "numpy"
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 
 # Use setuptools_scm to generate version from Git tags
 [tool.setuptools_scm]
