@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "suraida"
 description = "Creates a simple GUI for interactive plotting with sliders"
-version = "1.0.0"  # THIS IS THE PLACE WHERE THE VERSION GETS SET
+dynamic = ["version"]
 readme = "README.md"
 license = {text = "BSD"}
 authors = [{name = "Jens Koch", email = "jens-koch@northwestern.edu"}]
