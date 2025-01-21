@@ -1,0 +1,15 @@
+autodoc
+cycler
+docutils
+IPython
+ipykernel
+ipywidgets
+nbsphinx
+numpy>=1.14.2
+pygments>=2.4.1
+pydata-sphinx-theme==0.9
+sphinx>=4.5
+sphinx-autodoc-typehints
+sphinx-copybutton
+sphinx-design
+sphinxcontrib-napoleon
