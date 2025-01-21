@@ -73,7 +73,7 @@ html_favicon = "./_static/suraida-thumbnail.png"
 
 language = "en"
 
-autodoc_mock_imports = ["pytest", "numpy"]
+autodoc_mock_imports = ["numpy"]
 autosectionlabel_prefix_document = True
 autosummary_generate = True
 
