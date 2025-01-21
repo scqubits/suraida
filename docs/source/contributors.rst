@@ -17,6 +17,7 @@ Developers
 | Yunwei Lu (Northwestern University)
 
 
+
 .. _developers-contributors:
 
 ============
@@ -24,6 +25,6 @@ Contributors
 ============
 
 
-| Darren
+| Darren Ding (Northwestern University)
 | Lambert Lin (Northwestern University)
 | Yuxing Kang (Northwestern University)
