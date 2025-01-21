@@ -32,7 +32,7 @@ suraida is a lightweight open-source Python library package for interactive plot
 Getting Started
 ***************
 
-After :ref:`Install` of suraida, check out the :ref:`Example`.
+After :ref:`Install` of suraida, check out the `Example <./example/example.ipynb>`_.
 
 .. toctree::
    :hidden:
